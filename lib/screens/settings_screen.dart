@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gps_camera/services/settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, required this.onThemeChanged});
+
+  final ValueChanged<ThemeMode> onThemeChanged;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -12,6 +14,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsService _settingsService = SettingsService();
   bool _saveToGallery = true;
   int _imageQuality = 85;
+  ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
 
   @override
@@ -26,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _saveToGallery = settings.saveToGallery;
       _imageQuality = settings.imageQuality;
+      _themeMode = settings.themeMode;
       _isLoading = false;
     });
   }
@@ -33,6 +37,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveSettings() async {
     await _settingsService.saveSaveToGallery(_saveToGallery);
     await _settingsService.saveImageQuality(_imageQuality);
+  }
+
+  Future<void> _saveThemeMode(ThemeMode value) async {
+    setState(() => _themeMode = value);
+    await _settingsService.saveThemeMode(value);
+    widget.onThemeChanged(value);
   }
 
   @override
@@ -74,6 +84,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text(
           'Current: $_imageQuality%',
           style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 24),
+
+        Text('Theme', style: Theme.of(context).textTheme.titleMedium),
+
+        const SizedBox(height: 12),
+
+        SegmentedButton<ThemeMode>(
+          segments: const [
+            ButtonSegment(
+              value: ThemeMode.system,
+              icon: Icon(Icons.brightness_auto),
+              label: Text('System'),
+            ),
+            ButtonSegment(
+              value: ThemeMode.light,
+              icon: Icon(Icons.light_mode),
+              label: Text('Light'),
+            ),
+            ButtonSegment(
+              value: ThemeMode.dark,
+              icon: Icon(Icons.dark_mode),
+              label: Text('Dark'),
+            ),
+          ],
+          selected: {_themeMode},
+          onSelectionChanged: (selection) async {
+            await _saveThemeMode(selection.first);
+          },
         ),
       ],
     );

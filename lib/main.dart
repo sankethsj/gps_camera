@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gps_camera/services/settings_service.dart';
 import 'screens/camera_screen.dart';
 import 'screens/gallery_screen.dart';
 import 'screens/settings_screen.dart';
@@ -8,8 +9,38 @@ void main() {
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  final SettingsService _settingsService = SettingsService();
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final settings = await _settingsService.loadSettings();
+    if (!mounted) return;
+    setState(() {
+      _themeMode = settings.themeMode;
+    });
+  }
+
+  Future<void> _updateThemeMode(ThemeMode value) async {
+    await _settingsService.saveThemeMode(value);
+    if (!mounted) return;
+    setState(() {
+      _themeMode = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,14 +100,16 @@ class MainApp extends StatelessWidget {
       title: 'GPS Camera',
       theme: light,
       darkTheme: dark,
-      themeMode: ThemeMode.system,
-      home: const HomePage(),
+      themeMode: _themeMode,
+      home: HomePage(onThemeChanged: _updateThemeMode),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.onThemeChanged});
+
+  final ValueChanged<ThemeMode> onThemeChanged;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -169,7 +202,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return CameraScreen(key: _cameraKey);
       case 2:
-        return const SettingsScreen();
+        return SettingsScreen(onThemeChanged: widget.onThemeChanged);
       default:
         return CameraScreen(key: _cameraKey);
     }
