@@ -276,7 +276,7 @@ class CameraScreenState extends State<CameraScreen> {
             children: [
               FloatingActionButton(
                 mini: true,
-                backgroundColor: Theme.of(context).primaryColorDark,
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
                 heroTag: 'camera_flash',
                 onPressed: _toggleFlash,
                 child: _isFlashOn
@@ -286,7 +286,7 @@ class CameraScreenState extends State<CameraScreen> {
               SizedBox(width: 8),
               FloatingActionButton(
                 mini: true,
-                backgroundColor: Theme.of(context).primaryColorDark,
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
                 heroTag: 'flip_camera',
                 onPressed: _switchCamera,
                 child: const Icon(Icons.flip_camera_android),
