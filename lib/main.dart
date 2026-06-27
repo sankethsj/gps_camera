@@ -128,9 +128,9 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'GPS Camera',
-          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+          style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
         ),
         backgroundColor: colors.surfaceBright,
         elevation: 0,
@@ -149,39 +149,64 @@ class _HomePageState extends State<HomePage> {
               isSelected: _selectedIndex == 0,
               onPressed: () => setState(() => _selectedIndex = 0),
             ),
-            GestureDetector(
-              onTap: isTakingPicture
-                  ? null
-                  : () {
+            _selectedIndex == 1
+                ? GestureDetector(
+                    onTap: isTakingPicture
+                        ? null
+                        : () => _cameraKey.currentState?.takePhoto(),
+                    child: Opacity(
+                      opacity: isTakingPicture ? 0.5 : 1.0,
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.primary, width: 2),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: colors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () {
                       if (_selectedIndex != 1) {
                         setState(() => _selectedIndex = 1);
                         return;
                       }
-                      _cameraKey.currentState?.takePhoto();
                     },
-              child: Opacity(
-                opacity: isTakingPicture ? 0.5 : 1.0,
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                    child: Opacity(
+                      opacity: 0.7,
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: colors.outlineVariant,
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.camera_alt_outlined,
+                            size: 30,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
             IconButton(
               tooltip: 'Settings',
               selectedIcon: const Icon(Icons.settings),
