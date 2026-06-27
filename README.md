@@ -1,17 +1,36 @@
-# gps_camera
+# GPS Camera
 
-A new Flutter project.
+GPS Camera is a Flutter application that combines camera capture with live GPS and location-based overlays. It lets you take photos while viewing location metadata such as coordinates, altitude, and compass-style overlay information directly in the camera view.
+
+## Features
+
+- Capture photos from the device camera
+- Display live GPS location data during camera use
+- Show camera overlay information such as coordinates and altitude
+- Save and review captured photos with metadata
+- Configure app settings for camera and overlay behavior
+
+## Planned Improvements
+
+- Improve the visual design of the camera overlay
+- Add place names and reverse geocoding from location data
+- Support multiple overlay designs and themes
+- Refine metadata display for better readability on screen
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Install Flutter and set up your development environment.
+2. Clone the repository.
+3. Run the following commands:
 
-A few resources to get you started if this is your first Flutter project:
+   ```bash
+   flutter pub get
+   flutter run
+   ```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Project Structure
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- lib/screens: app screens such as camera, gallery, and settings
+- lib/services: camera, location, and settings services
+- lib/widgets: reusable UI components and overlay widgets
+- lib/models: data models for settings and photo metadata
