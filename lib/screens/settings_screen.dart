@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gps_camera/services/settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,11 +9,38 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final SettingsService _settingsService = SettingsService();
   bool _saveToGallery = true;
   int _imageQuality = 85;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await _settingsService.loadSettings();
+    if (!mounted) return;
+    setState(() {
+      _saveToGallery = settings.saveToGallery;
+      _imageQuality = settings.imageQuality;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    await _settingsService.saveSaveToGallery(_saveToGallery);
+    await _settingsService.saveImageQuality(_imageQuality);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -22,8 +50,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('Save to Gallery'),
           subtitle: const Text('Automatically save photos to device gallery'),
           value: _saveToGallery,
-          onChanged: (value) {
+          onChanged: (value) async {
             setState(() => _saveToGallery = value);
+            await _saveSettings();
           },
         ),
         const SizedBox(height: 24),
@@ -37,6 +66,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           label: '$_imageQuality%',
           onChanged: (value) {
             setState(() => _imageQuality = value.toInt());
+          },
+          onChangeEnd: (_) async {
+            await _saveSettings();
           },
         ),
         Text(

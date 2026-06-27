@@ -9,6 +9,7 @@ import 'package:gps_camera/models/camera_overlay_data.dart';
 import 'package:gps_camera/services/camera_service.dart';
 import 'package:gps_camera/services/image_overlay_painter_service.dart';
 import 'package:gps_camera/services/location_overlay_service.dart';
+import 'package:gps_camera/services/settings_service.dart';
 import 'package:gps_camera/widgets/camera_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,8 +31,11 @@ class CameraScreenState extends State<CameraScreen> {
   final ImageOverlayPainterService _imageOverlayPainterService =
       const ImageOverlayPainterService();
   final CameraService _cameraService = CameraService();
+  final SettingsService _settingsService = SettingsService();
   bool _isTakingPicture = false;
   bool _isFlashOn = false;
+  bool _saveToGallery = true;
+  int _imageQuality = 85;
 
   bool get isTakingPicture => _isTakingPicture;
 
@@ -47,6 +51,16 @@ class CameraScreenState extends State<CameraScreen> {
       onError: (_) {},
     );
     _isFlashOn = false;
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await _settingsService.loadSettings();
+    if (!mounted) return;
+    setState(() {
+      _saveToGallery = settings.saveToGallery;
+      _imageQuality = settings.imageQuality;
+    });
   }
 
   Future<CameraController> _initializeCamera({
@@ -166,19 +180,25 @@ class CameraScreenState extends State<CameraScreen> {
             previewSize: previewSize,
           );
 
-      await _cameraService.savePhoto(File(imageWithOverlayPath));
+      await _cameraService.savePhoto(
+        File(imageWithOverlayPath),
+        quality: _imageQuality,
+      );
 
-      // Save to Album
-      String album = "GPS Camera";
-      debugPrint(imageWithOverlayPath);
-
-      await Gal.putImage(imageWithOverlayPath, album: album);
+      if (_saveToGallery) {
+        String album = 'GPS Camera';
+        await Gal.putImage(imageWithOverlayPath, album: album);
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Photo saved to album: $album.'),
-          duration: Durations.short1,
+          content: Text(
+            _saveToGallery
+                ? 'Photo saved to gallery and app storage.'
+                : 'Photo saved to app storage only.',
+          ),
+          duration: Durations.long2,
         ),
       );
     } catch (e) {

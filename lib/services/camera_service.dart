@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:gps_camera/models/photo_metadata.dart';
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class CameraService {
-  Future<PhotoMetadata> savePhoto(File sourceFile) async {
+  Future<PhotoMetadata> savePhoto(File sourceFile, {int quality = 85}) async {
     final dir = await getApplicationDocumentsDirectory();
     final photosDir = Directory(p.join(dir.path, 'photos'));
     if (!photosDir.existsSync()) {
@@ -12,11 +13,21 @@ class CameraService {
     }
 
     final timestamp = DateTime.now();
-    final fileName =
-        '${timestamp.millisecondsSinceEpoch}${p.extension(sourceFile.path)}';
+    final fileName = '${timestamp.millisecondsSinceEpoch}.jpg';
     final targetFile = File(p.join(photosDir.path, fileName));
 
-    await sourceFile.copy(targetFile.path);
+    final sourceBytes = await sourceFile.readAsBytes();
+    final decodedImage = img.decodeImage(sourceBytes);
+
+    if (decodedImage != null) {
+      final encodedBytes = img.encodeJpg(
+        decodedImage,
+        quality: quality.clamp(1, 100),
+      );
+      await targetFile.writeAsBytes(encodedBytes, flush: true);
+    } else {
+      await sourceFile.copy(targetFile.path);
+    }
 
     return PhotoMetadata(path: targetFile.path, timestamp: timestamp);
   }
