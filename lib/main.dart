@@ -1,7 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'features/camera/screens/camera_screen.dart';
-import 'features/camera/screens/gallery_screen.dart';
-import 'features/camera/screens/settings_screen.dart';
+import 'screens/camera_screen.dart';
+import 'screens/gallery_screen.dart';
+import 'screens/settings_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +18,7 @@ class MainApp extends StatelessWidget {
     const Color seedColor = Color.fromARGB(255, 21, 49, 80);
 
     final ColorScheme lightScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
+      seedColor: const Color.fromARGB(255, 10, 88, 177),
       brightness: Brightness.light,
     );
 
@@ -25,7 +27,6 @@ class MainApp extends StatelessWidget {
       useMaterial3: true,
       scaffoldBackgroundColor: lightScheme.surface,
       appBarTheme: AppBarTheme(
-        centerTitle: true,
         backgroundColor: lightScheme.primary,
         foregroundColor: lightScheme.onPrimary,
         elevation: 0,
@@ -42,7 +43,7 @@ class MainApp extends StatelessWidget {
     );
 
     final ColorScheme darkScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
+      seedColor: const Color.fromARGB(255, 7, 32, 59),
       brightness: Brightness.dark,
     );
 
@@ -84,25 +85,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<CameraScreenState> _cameraKey = GlobalKey<CameraScreenState>();
+  final GlobalKey<CameraScreenState> _cameraKey =
+      GlobalKey<CameraScreenState>();
   int _selectedIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final bool isTakingPicture =
+        _cameraKey.currentState?.isTakingPicture ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'GPS Camera',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: colors.primary,
+        backgroundColor: colors.surfaceBright,
         elevation: 0,
       ),
       body: _getBody(),
       bottomNavigationBar: BottomAppBar(
-        height: 84,
+        color: colors.surface,
+        height: 120,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -113,18 +118,38 @@ class _HomePageState extends State<HomePage> {
               isSelected: _selectedIndex == 0,
               onPressed: () => setState(() => _selectedIndex = 0),
             ),
-            IconButton.filled(
-              tooltip: 'Shutter',
-              iconSize: 34,
-              padding: const EdgeInsets.all(16),
-              icon: const Icon(Icons.camera_alt),
-              onPressed: () {
-                if (_selectedIndex != 1) {
-                  setState(() => _selectedIndex = 1);
-                  return;
-                }
-                _cameraKey.currentState?.takePhoto();
-              },
+            GestureDetector(
+              onTap: isTakingPicture
+                  ? null
+                  : () {
+                      if (_selectedIndex != 1) {
+                        setState(() => _selectedIndex = 1);
+                        return;
+                      }
+                      _cameraKey.currentState?.takePhoto();
+                    },
+              child: Opacity(
+                opacity: isTakingPicture ? 0.5 : 1.0,
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
             IconButton(
               tooltip: 'Settings',

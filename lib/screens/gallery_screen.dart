@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:gps_camera/services/camera_service.dart';
 import 'dart:io';
 
@@ -63,21 +64,30 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           itemCount: photos.length,
           itemBuilder: (context, index) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(File(photos[index]), fit: BoxFit.cover),
-              ),
+            final path = photos[index];
+            return GestureDetector(
+              onTap: () async {
+                await OpenFilex.open(path);
+              },
+              child: Image.file(File(path), fit: BoxFit.cover),
             );
           },
         );
       },
+    );
+  }
+}
+
+class _PhotoViewer extends StatelessWidget {
+  final String path;
+
+  const _PhotoViewer({required this.path});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(child: InteractiveViewer(child: Image.file(File(path)))),
     );
   }
 }
