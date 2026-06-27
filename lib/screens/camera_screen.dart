@@ -1,6 +1,12 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
+import 'package:gps_camera/models/camera_overlay_data.dart';
+import 'package:gps_camera/services/image_overlay_painter_service.dart';
+import 'package:gps_camera/services/location_overlay_service.dart';
+import 'package:gps_camera/widgets/camera_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -12,7 +18,14 @@ class CameraScreen extends StatefulWidget {
 
 class CameraScreenState extends State<CameraScreen> {
   late Future<CameraController> _controllerFuture;
+  late Stream<CameraOverlayData> _overlayDataStream;
+  StreamSubscription<CameraOverlayData>? _overlayDataSubscription;
+  CameraOverlayData? _latestOverlayData;
   CameraController? _controller;
+  final LocationOverlayService _locationOverlayService =
+      const LocationOverlayService();
+  final ImageOverlayPainterService _imageOverlayPainterService =
+      const ImageOverlayPainterService();
   bool _isTakingPicture = false;
   bool _isFlashOn = false;
 
@@ -22,6 +35,13 @@ class CameraScreenState extends State<CameraScreen> {
   void initState() {
     super.initState();
     _controllerFuture = _initializeCamera();
+    _overlayDataStream = _locationOverlayService
+        .watchOverlayData()
+        .asBroadcastStream();
+    _overlayDataSubscription = _overlayDataStream.listen(
+      (data) => _latestOverlayData = data,
+      onError: (_) {},
+    );
     _isFlashOn = false;
   }
 
@@ -114,6 +134,7 @@ class CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
+    _overlayDataSubscription?.cancel();
     _controller?.dispose();
     super.dispose();
   }
@@ -130,12 +151,21 @@ class CameraScreenState extends State<CameraScreen> {
     setState(() => _isTakingPicture = true);
     try {
       final image = await controller.takePicture();
+      final overlayData =
+          _latestOverlayData ?? await _locationOverlayService.getOverlayData();
+      final previewSize = context.size ?? MediaQuery.sizeOf(context);
+      final imageWithOverlayPath =
+          await _imageOverlayPainterService.paintOverlayOnImage(
+        imagePath: image.path,
+        overlayData: overlayData,
+        previewSize: previewSize,
+      );
 
       // Save to Album
       String album = "GPS Camera";
-      debugPrint(image.path);
+      debugPrint(imageWithOverlayPath);
 
-      await Gal.putImage(image.path, album: album);
+      await Gal.putImage(imageWithOverlayPath, album: album);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -233,34 +263,8 @@ class CameraScreenState extends State<CameraScreen> {
             ],
           ),
         ),
-        const CameraOverlay(),
+        CameraOverlay(overlayDataStream: _overlayDataStream),
       ],
-    );
-  }
-}
-
-class CameraOverlay extends StatelessWidget {
-  const CameraOverlay({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: 16,
-      right: 16,
-      bottom: 80,
-      child: IgnorePointer(
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Text(
-            'Overlay goes here',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
     );
   }
 }
