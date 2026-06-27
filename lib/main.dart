@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'screens/camera_screen.dart';
 import 'screens/gallery_screen.dart';
@@ -18,7 +16,7 @@ class MainApp extends StatelessWidget {
     const Color seedColor = Color.fromARGB(255, 21, 49, 80);
 
     final ColorScheme lightScheme = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 10, 88, 177),
+      seedColor: seedColor,
       brightness: Brightness.light,
     );
 
@@ -43,7 +41,7 @@ class MainApp extends StatelessWidget {
     );
 
     final ColorScheme darkScheme = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 7, 32, 59),
+      seedColor: seedColor,
       brightness: Brightness.dark,
     );
 

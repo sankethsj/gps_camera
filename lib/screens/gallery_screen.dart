@@ -77,17 +77,3 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 }
-
-class _PhotoViewer extends StatelessWidget {
-  final String path;
-
-  const _PhotoViewer({required this.path});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(child: InteractiveViewer(child: Image.file(File(path)))),
-    );
-  }
-}
