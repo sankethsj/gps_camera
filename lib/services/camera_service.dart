@@ -42,4 +42,13 @@ class CameraService {
 
     return files.map(PhotoMetadata.fromFile).toList();
   }
+
+  Future<void> deletePhotos(List<PhotoMetadata> photos) async {
+    for (final photo in photos) {
+      final file = File(photo.path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+  }
 }
