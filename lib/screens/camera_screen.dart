@@ -153,13 +153,14 @@ class CameraScreenState extends State<CameraScreen> {
       final image = await controller.takePicture();
       final overlayData =
           _latestOverlayData ?? await _locationOverlayService.getOverlayData();
+      if (!mounted) return;
       final previewSize = context.size ?? MediaQuery.sizeOf(context);
-      final imageWithOverlayPath =
-          await _imageOverlayPainterService.paintOverlayOnImage(
-        imagePath: image.path,
-        overlayData: overlayData,
-        previewSize: previewSize,
-      );
+      final imageWithOverlayPath = await _imageOverlayPainterService
+          .paintOverlayOnImage(
+            imagePath: image.path,
+            overlayData: overlayData,
+            previewSize: previewSize,
+          );
 
       // Save to Album
       String album = "GPS Camera";
@@ -248,14 +249,22 @@ class CameraScreenState extends State<CameraScreen> {
           child: Row(
             children: [
               FloatingActionButton(
+                mini: true,
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColorDark,
                 heroTag: 'camera_flash',
                 onPressed: _toggleFlash,
                 child: _isFlashOn
                     ? const Icon(Icons.flash_on)
                     : const Icon(Icons.flash_off),
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 8),
               FloatingActionButton(
+                mini: true,
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColorDark,
                 heroTag: 'flip_camera',
                 onPressed: _switchCamera,
                 child: const Icon(Icons.flip_camera_android),
