@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:gps_camera/models/photo_metadata.dart';
 import 'package:gps_camera/services/camera_service.dart';
 import 'dart:io';
 
@@ -12,7 +13,7 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   final CameraService _service = CameraService();
-  late Future<List<String>> _photosFuture;
+  late Future<List<PhotoMetadata>> _photosFuture;
 
   @override
   void initState() {
@@ -22,7 +23,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
+    return FutureBuilder<List<PhotoMetadata>>(
       future: _photosFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,12 +65,41 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           itemCount: photos.length,
           itemBuilder: (context, index) {
-            final path = photos[index];
+            final photo = photos[index];
             return GestureDetector(
               onTap: () async {
-                await OpenFilex.open(path);
+                await OpenFilex.open(photo.path);
               },
-              child: Image.file(File(path), fit: BoxFit.cover),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Image.file(
+                        File(photo.path),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      child: Text(
+                        photo.timestamp.toLocal().toString().split('.').first,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );

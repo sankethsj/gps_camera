@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
+import 'dart:io';
+
 import 'package:gps_camera/models/camera_overlay_data.dart';
+import 'package:gps_camera/services/camera_service.dart';
 import 'package:gps_camera/services/image_overlay_painter_service.dart';
 import 'package:gps_camera/services/location_overlay_service.dart';
 import 'package:gps_camera/widgets/camera_overlay.dart';
@@ -26,6 +29,7 @@ class CameraScreenState extends State<CameraScreen> {
       const LocationOverlayService();
   final ImageOverlayPainterService _imageOverlayPainterService =
       const ImageOverlayPainterService();
+  final CameraService _cameraService = CameraService();
   bool _isTakingPicture = false;
   bool _isFlashOn = false;
 
@@ -162,6 +166,8 @@ class CameraScreenState extends State<CameraScreen> {
             previewSize: previewSize,
           );
 
+      await _cameraService.savePhoto(File(imageWithOverlayPath));
+
       // Save to Album
       String album = "GPS Camera";
       debugPrint(imageWithOverlayPath);
@@ -250,9 +256,7 @@ class CameraScreenState extends State<CameraScreen> {
             children: [
               FloatingActionButton(
                 mini: true,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColorDark,
+                backgroundColor: Theme.of(context).primaryColorDark,
                 heroTag: 'camera_flash',
                 onPressed: _toggleFlash,
                 child: _isFlashOn
@@ -262,9 +266,7 @@ class CameraScreenState extends State<CameraScreen> {
               SizedBox(width: 8),
               FloatingActionButton(
                 mini: true,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColorDark,
+                backgroundColor: Theme.of(context).primaryColorDark,
                 heroTag: 'flip_camera',
                 onPressed: _switchCamera,
                 child: const Icon(Icons.flip_camera_android),
